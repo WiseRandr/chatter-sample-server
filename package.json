@@ -4,13 +4,15 @@
   "description": "Live server for chatter",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
   },
   "author": "wise",
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4",
     "mongoose": "^5.3.16",
+    "nodemon": "^1.18.8",
     "socket.io": "^2.2.0"
   }
 }
