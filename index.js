@@ -2,9 +2,11 @@ const app = require("express")();
 const http = require("http");
 const socketIo = require('socket.io');
 const mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
 const port = 8383;
 
 const chatUser = require('./model/chatuser');
+const Message = require('./model/chat');
 
 const route = require('./route');
 
@@ -14,7 +16,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 // Make a mongo connection first
-mongoose.connect('mongodb://localhost:27017/chatter');
+mongoose.connect('mongodb://wise:wise0123@ds047474.mlab.com:47474/chatter');
 mongoose.connection.once('open', () => {console.log('Mongo connected')}).on('error', (err) => {console.log(err)});
 
 io.on('connection', socket => {
@@ -50,7 +52,39 @@ io.on('connection', socket => {
         });
     });
 
-    io.sockets.on('connect', () => console.log('User connected'));
+    socket.on('updateUser', (user) => {
+        console.log("Updating process ...");
+        chatUser.findOne({username: user.username}).then((res) => {
+            res.name = user.name ? user.name : res.name;
+            res.username = user.username ? user.username : res.username;
+            res.email = user.email ? user.email : res.email;
+
+            var newUser = new chatUser(res);
+            newUser.save().then(()=>{
+                console.log('Updated')
+                io.sockets.emit('updatedUser', res);
+            });
+        });
+    });
+
+    socket.on('sendMessage', (message) => {
+        message.time = Date.now();
+        var msg = new Message(message);
+        msg.save().then(() => {
+            io.sockets.emit('receiveMessage', message);
+        });
+    });
+
+    socket.on('preparingChat', function() {
+        Message.find({}).then(messages => {
+            var configs = {};
+            configs.messages = messages;
+
+            io.sockets.emit('finished', configs);
+        });
+    });
+
+    socket.on('typing', name => socket.broadcast.emit('receiveTyping', name));
 });
 
 server.listen(port, () => {console.log('Express server is running on port', port)});
