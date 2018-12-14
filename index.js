@@ -1,5 +1,6 @@
 const app = require("express")();
 const http = require("http");
+const cors = require('cors');
 const socketIo = require('socket.io');
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -10,6 +11,7 @@ const Message = require('./model/chat');
 
 const route = require('./route');
 
+app.use(cors());
 app.use(route);
 
 const server = http.createServer(app);
