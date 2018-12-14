@@ -3,7 +3,7 @@ const http = require("http");
 const socketIo = require('socket.io');
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
-const port = 8383;
+const port = process.env.PORT || 8383;
 
 const chatUser = require('./model/chatuser');
 const Message = require('./model/chat');
